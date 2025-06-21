@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.96.1 -->
+<interface>
+  <requires lib="gtk" version="4.14"/>
+  <requires lib="libadwaita" version="1.2"/>
+  <object class="AdwAlertDialog" id="MainWindow">
+    <property name="extra-child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">20</property>
+        <child>
+          <object class="GtkImage">
+            <property name="icon-name">dialog-error-symbolic</property>
+            <property name="pixel-size">64</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="Error">
+            <property name="label">Failed to load the error</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="Dismiss">
+            <property name="halign">center</property>
+            <property name="label">Dismiss</property>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+</interface>

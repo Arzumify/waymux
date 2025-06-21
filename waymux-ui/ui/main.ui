@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.96.1 -->
+<interface>
+  <!-- interface-name main.ui -->
+  <requires lib="gtk" version="4.14"/>
+  <requires lib="libadwaita" version="1.2"/>
+  <object class="AdwApplicationWindow" id="MainWindow">
+    <property name="default-height">-1</property>
+    <property name="default-width">-1</property>
+    <property name="title">Waymux</property>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="AdwHeaderBar"/>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="vexpand">True</property>
+            <property name="vexpand-set">True</property>
+            <child>
+              <object class="GtkImage">
+                <property name="icon-name">system-switch-user-symbolic</property>
+                <property name="margin-bottom">20</property>
+                <property name="margin-top">20</property>
+                <property name="pixel-size">64</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow">
+                <property name="margin-bottom">5</property>
+                <property name="margin-end">20</property>
+                <property name="margin-start">20</property>
+                <property name="title">Username</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPasswordEntryRow">
+                <property name="margin-end">20</property>
+                <property name="margin-start">20</property>
+                <property name="title">Password</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="halign">end</property>
+                <property name="label">Login</property>
+                <property name="margin-bottom">20</property>
+                <property name="margin-end">20</property>
+                <property name="margin-start">20</property>
+                <property name="margin-top">20</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

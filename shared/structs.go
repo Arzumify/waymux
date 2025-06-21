@@ -14,7 +14,7 @@ func writeUint64(w io.Writer, v uint64) (int64, error) {
 	n, err := w.Write(buf[:])
 	written += int64(n)
 	if err != nil {
-		return written, fmt.Errorf("error writing uint64: %w", err)
+		return written, fmt.Errorf("failed to write uint64 content: %w", err)
 	}
 	return written, nil
 }
@@ -23,10 +23,10 @@ func readUint64(r io.Reader) (uint64, error) {
 	buf := make([]byte, U64size)
 	n, err := r.Read(buf)
 	if err != nil {
-		return 0, fmt.Errorf("error reading uint64: %w", err)
+		return 0, fmt.Errorf("failed to read uint64 content: %w", err)
 	}
 	if n != U64size {
-		return 0, fmt.Errorf("error reading uint64: expected %d bytes, got %d", U64size, n)
+		return 0, fmt.Errorf("failed to read uint64 content: expected %d bytes, got %d", U64size, n)
 	}
 
 	return binary.LittleEndian.Uint64(buf), nil
@@ -37,13 +37,13 @@ func writeString(w io.Writer, s string) (int64, error) {
 	n, err := writeUint64(w, uint64(len(s)))
 	written += n
 	if err != nil {
-		return written, fmt.Errorf("error writing string size: %w", err)
+		return written, fmt.Errorf("failed to write string size: %w", err)
 	}
 
 	wn, err := w.Write([]byte(s))
 	written += int64(wn)
 	if err != nil {
-		return written, fmt.Errorf("error writing string: %w", err)
+		return written, fmt.Errorf("failed to write string content: %w", err)
 	}
 	return written, nil
 }
@@ -51,12 +51,12 @@ func writeString(w io.Writer, s string) (int64, error) {
 func readString(r io.Reader) (string, error) {
 	size, err := readUint64(r)
 	if err != nil {
-		return "", fmt.Errorf("error reading size: %w", err)
+		return "", fmt.Errorf("failed to read size size: %w", err)
 	}
 	buf := make([]byte, size)
 	n, err := r.Read(buf)
 	if err != nil {
-		return "", fmt.Errorf("error reading string size: %w", err)
+		return "", fmt.Errorf("failed to read string content: %w", err)
 	}
 	return string(buf[:n]), nil
 }
@@ -64,6 +64,7 @@ func readString(r io.Reader) (string, error) {
 type HostCompositor struct {
 	XdgRuntimeDir  string
 	WaylandDisplay string
+	PID            int
 }
 
 func (h *HostCompositor) WriteTo(w io.Writer) (int64, error) {
@@ -71,39 +72,42 @@ func (h *HostCompositor) WriteTo(w io.Writer) (int64, error) {
 	n, err := writeString(w, h.XdgRuntimeDir)
 	written += n
 	if err != nil {
-		return written, fmt.Errorf("error writing string: %w", err)
+		return written, fmt.Errorf("failed to write XDG RuntimeDir: %w", err)
 	}
+
 	n, err = writeString(w, h.WaylandDisplay)
 	written += n
 	if err != nil {
-		return written, fmt.Errorf("error writing string: %w", err)
+		return written, fmt.Errorf("failed to write Wayland Display: %w", err)
+	}
+
+	n, err = writeUint64(w, uint64(h.PID))
+	written += n
+	if err != nil {
+		return written, fmt.Errorf("failed to write PID: %w", err)
 	}
 	return written, nil
 }
 
-type RegisterHost struct {
-	HostCompositor
-	PID uint64
-}
-
-func (r *RegisterHost) WriteTo(w io.Writer) (int64, error) {
-	var written int64
-	n, err := r.HostCompositor.WriteTo(w)
-	written += n
+func ReadHostCompositorFrom(r io.Reader) (*HostCompositor, error) {
+	var h HostCompositor
+	var err error
+	h.XdgRuntimeDir, err = readString(r)
 	if err != nil {
-		return written, fmt.Errorf("error writing string: %w", err)
+		return nil, fmt.Errorf("failed to read XDG RuntimeDir: %w", err)
 	}
 
-	n, err = writeUint64(w, r.PID)
-	written += n
+	h.WaylandDisplay, err = readString(r)
 	if err != nil {
-		return written, fmt.Errorf("error writing string: %w", err)
+		return nil, fmt.Errorf("failed to read Wayland Display: %w", err)
 	}
-	return written, nil
-}
 
-type StopHost struct{}
+	pidUint64, err := readUint64(r)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read PID: %w", err)
+	}
 
-func (s *StopHost) WriteTo(w io.Writer) (int64, error) {
-	return 0, nil
+	h.PID = int(pidUint64)
+
+	return &h, nil
 }
