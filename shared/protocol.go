@@ -92,19 +92,23 @@ func (m *MessageSocket) WriteMessage(msg *Message) (int64, error) {
 	}
 
 	sizeBuffer := make([]byte, u64size)
-	binary.BigEndian.PutUint64(sizeBuffer, uint64(msg.Data.N))
+	if msg.Data != nil {
+		binary.BigEndian.PutUint64(sizeBuffer, uint64(msg.Data.N))
+	}
 	n, err = m.Write(sizeBuffer)
 	written += int64(n)
 	if err != nil {
 		return written, fmt.Errorf("failed to write size: %w", err)
 	}
 
-	if msg.Data.N > 0 {
-		nc, err := io.CopyN(m, msg.Data, msg.Data.N)
-		if err != nil {
-			return written, fmt.Errorf("failed to write size: %w", err)
+	if msg.Data != nil {
+		if msg.Data.N > 0 {
+			nc, err := io.CopyN(m, msg.Data, msg.Data.N)
+			if err != nil {
+				return written, fmt.Errorf("failed to write size: %w", err)
+			}
+			written += nc
 		}
-		written += nc
 	}
 
 	return written, nil

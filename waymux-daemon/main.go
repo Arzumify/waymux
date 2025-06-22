@@ -72,7 +72,7 @@ func startListener() error {
 		return fmt.Errorf("failed to create listener: %w", err)
 	}
 
-	err = syscall.Chmod(socket, 0777)
+	err = os.Chmod(socket, 0777)
 	if err != nil {
 		return fmt.Errorf("failed to chmod listener: %w", err)
 	}
